@@ -2,31 +2,38 @@
 
 import socket
 import pickle
-from threading import Thread
+from threading import Thread, Condition
 from _thread import *
 import time
 import random
 
+condition = Condition()
+program_duration = 30
+
 
 class Server(Thread):
     queue = []
+    running = True
+    total_wait_time = 0
 
     def thread2(self, c):
-        while True:
+        while self.running:
+            condition.acquire()
             print("thread 2")
-            if len(self.queue) > 0:
-                num = self.queue.pop(0)
-                print("Consumed", num)
-                print("Thread 2 sending queue: ", str(self.queue))
-                data = pickle.dumps(self.queue)
-                c.send(data)
-                time.sleep(random.random())
-            else:
-                print("waiting on producer")
+            if len(self.queue) == 0:
+                print("Queue is empty, waiting on producer")
+                t0 = time.time()
+                condition.wait()
+                t1 = time.time()
+                self.total_wait_time += (t1 - t0)
+            num = self.queue.pop(0)
+            print("Consumed", num)
+            condition.release()
+            time.sleep(random.random())
 
         c.close()
 
-    def thread1(self):
+    def run(self):
         host = "127.0.0.1"
         port = 12345
 
@@ -40,16 +47,26 @@ class Server(Thread):
 
         start_new_thread(self.thread2, (c,))
 
-        while True:
+        while self.running:
+            condition.acquire()
             print("thread 1")
             recvd_data = c.recv(1024)
             self.queue = pickle.loads(recvd_data)
-            print('Received from the client :', str(self.queue))
+            print('Received from the server :', str(self.queue))
+            condition.notify()
+            condition.release()
             time.sleep(random.random())
+
+            data = pickle.dumps(self.queue)
+            print('Sending to the client :', str(self.queue))
+            c.send(data)
 
         c.close()
         s.close()
 
 
 server = Server()
-server.thread1()
+server.start()
+time.sleep(program_duration)
+server.running = False
+print("total consumer wait time: ", server.total_wait_time)

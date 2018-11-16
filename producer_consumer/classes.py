@@ -5,6 +5,7 @@ import random
 queue = []
 MAX_NUM = 5
 condition = Condition()
+program_duration = 30
 
 
 class ProducerThread(Thread):
@@ -59,7 +60,7 @@ p = ProducerThread()
 c = ConsumerThread()
 p.start()
 c.start()
-time.sleep(10)
+time.sleep(program_duration)
 p.running = False
 c.running = False
 
