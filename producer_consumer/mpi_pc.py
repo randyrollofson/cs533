@@ -1,4 +1,3 @@
-import numpy
 from mpi4py import MPI
 import random
 from threading import Thread, Condition
@@ -7,8 +6,6 @@ from thread import *
 
 comm = MPI.COMM_WORLD
 rank = comm.Get_rank()
-randNum = numpy.zeros(1)
-diffNum = numpy.random.random_sample(1)
 MAX_NUM = 5
 condition = Condition()
 program_duration = 30
@@ -69,7 +66,7 @@ if rank == 1:
     time.sleep(program_duration)
     producer.running = False
     time.sleep(2)
-    print("Total producer wait time: %d"%producer.total_wait_time)
+    print("Total producer wait time: %f"%producer.total_wait_time)
     print("Total digits produced: %d"%producer.total_digits_produced)
 
  
@@ -125,7 +122,7 @@ if rank == 0:
     time.sleep(program_duration)
     consumer.running = False
     time.sleep(2)
-    print("total consumer wait time: %d"%consumer.total_wait_time)
+    print("total consumer wait time: %f"%consumer.total_wait_time)
     print("Total digits consumed: %d"%consumer.total_digits_consumed)
 
 
