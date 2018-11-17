@@ -15,6 +15,7 @@ class Server(Thread):
     queue = []
     running = True
     total_wait_time = 0
+    total_digits_consumed = 0
 
     def thread2(self, c):
         while self.running:
@@ -27,6 +28,7 @@ class Server(Thread):
                 t1 = time.time()
                 self.total_wait_time += (t1 - t0)
             num = self.queue.pop(0)
+            self.total_digits_consumed += 1
             print("Consumed", num)
             condition.release()
             time.sleep(random.random())
@@ -48,18 +50,31 @@ class Server(Thread):
         start_new_thread(self.thread2, (c,))
 
         while self.running:
+            # try:
             condition.acquire()
             print("thread 1")
-            recvd_data = c.recv(1024)
+            try:
+                recvd_data = c.recv(1024)
+            except OSError:
+                print("ending program")
+                break
             self.queue = pickle.loads(recvd_data)
             print('Received from the server :', str(self.queue))
             condition.notify()
             condition.release()
             time.sleep(random.random())
 
+            condition.acquire()
             data = pickle.dumps(self.queue)
             print('Sending to the client :', str(self.queue))
-            c.send(data)
+            try:
+                c.send(data)
+            except OSError:
+                print("ending program")
+                break
+            condition.release()
+            # except OSError:
+            #     print("ending program")
 
         c.close()
         s.close()
@@ -70,3 +85,4 @@ server.start()
 time.sleep(program_duration)
 server.running = False
 print("total consumer wait time: ", server.total_wait_time)
+print("Total digits consumed:", server.total_digits_consumed)

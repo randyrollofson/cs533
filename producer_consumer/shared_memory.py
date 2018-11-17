@@ -11,6 +11,7 @@ program_duration = 30
 class ProducerThread(Thread):
     running = True
     total_wait_time = 0
+    total_digits_produced = 0
 
     def run(self):
         nums = range(5)
@@ -25,6 +26,7 @@ class ProducerThread(Thread):
                 print("Space in queue, Consumer notified the producer")
             num = random.choice(nums)
             queue.append(num)
+            self.total_digits_produced += 1
             print("Produced", num)
             print(queue)
             condition.notify()
@@ -36,6 +38,7 @@ class ProducerThread(Thread):
 class ConsumerThread(Thread):
     running = True
     total_wait_time = 0
+    total_digits_consumed = 0
 
     def run(self):
         while self.running:
@@ -48,6 +51,7 @@ class ConsumerThread(Thread):
                 self.total_wait_time += (t1 - t0)
                 print("Producer added something to queue and notified the consumer")
             num = queue.pop(0)
+            self.total_digits_consumed += 1
             print("Consumed", num)
             print(queue)
             condition.notify()
@@ -64,5 +68,7 @@ time.sleep(program_duration)
 p.running = False
 c.running = False
 
-print("total producer wait time: ", p.total_wait_time)
-print("total consumer wait time: ", c.total_wait_time)
+print("Total producer wait time: ", p.total_wait_time)
+print("Total consumer wait time: ", c.total_wait_time)
+print("Total digits produced:", p.total_digits_produced)
+print("Total digits consumed:", c.total_digits_consumed)

@@ -16,6 +16,7 @@ class Client(Thread):
     queue = []
     running = True
     total_wait_time = 0
+    total_digits_produced = 0
 
     def thread2(self, s):
         while self.running:
@@ -30,6 +31,7 @@ class Client(Thread):
             nums = range(5)
             num = random.choice(nums)
             self.queue.append(num)
+            self.total_digits_produced += 1
             print("Produced", num)
             condition.release()
             time.sleep(random.random())
@@ -43,21 +45,31 @@ class Client(Thread):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect((host, port))
 
+        # Don't want to start with an empty queue
         nums = range(5)
         num = random.choice(nums)
         self.queue.append(num)
+        self.total_digits_produced += 1
 
         start_new_thread(self.thread2, (s,))
 
         while self.running:
+            # try:
+            condition.acquire()
             print("thread 1")
             data = pickle.dumps(self.queue)
             print('Sending to the server :', str(self.queue))
             s.send(data)
+            condition.release()
 
             condition.acquire()
             recvd_data = s.recv(1024)
-            self.queue = pickle.loads(recvd_data)
+            try:
+                self.queue = pickle.loads(recvd_data)
+            except EOFError:
+                print("ending program")
+                condition.release()
+                break
             print('Received from the server :', str(self.queue))
             condition.notify()
             condition.release()
@@ -70,5 +82,6 @@ client = Client()
 client.start()
 time.sleep(program_duration)
 client.running = False
-print("total producer wait time: ", client.total_wait_time)
+print("Total producer wait time: ", client.total_wait_time)
+print("Total digits produced:", client.total_digits_produced)
 
