@@ -80,7 +80,12 @@ class ConsumerThread(Thread):
             condition.release()
             time.sleep(random.random())
 
-
+if os.path.isfile(FILENAME):
+    pass
+else:
+    with open(FILENAME, 'w'):
+        pass
+    
 p = ProducerThread()
 c = ConsumerThread()
 p.start()
