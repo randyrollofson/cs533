@@ -81,10 +81,10 @@ class ConsumerThread(Thread):
             time.sleep(random.random())
 
 if os.path.isfile(FILENAME):
-    pass
+    pass    #pass if file exists
 else:
     with open(FILENAME, 'w'):
-        pass
+        pass    #creates file as it doens't exist
     
 p = ProducerThread()
 c = ConsumerThread()
