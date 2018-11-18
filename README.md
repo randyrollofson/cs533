@@ -4,9 +4,12 @@ Create 5 applications (use python, java, C or whatever you want) and have them u
 TCP and MPI. Devise a way to test the correctness of each solution to each problem. Measure and compare performance and usability of each approach.
 
 To download the mpi4py python package use the following command:
-pip install mpi4py 
+`pip install mpi4py`
 or
-sudo apt-get install python-mpi4py
+`sudo apt-get install python-mpi4py`
+
+(Note: on Mac you must first run `brew install mpich`, then `pip install mpi4py`)
+
 
 To run MPI producer-consumer file:
-mpiexec -n 2 python mpi_pc.py
+`mpiexec -n 2 python3 mpi_pc.py`
