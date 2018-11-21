@@ -1,14 +1,13 @@
-# Server acts as the "table" in the dining philosophers problem.
+# Server acts as the "waiter" in the dining philosophers problem.
 # Server manages the distribution of the chopsticks to the philosophers
 
 import socket
 import pickle
 import time
 from threading import Thread, Lock
-from _thread import *
 
 
-program_duration = 10
+program_duration = 30
 chopsticks = []
 
 lock = Lock()
@@ -36,12 +35,6 @@ class Server(Thread):
 
         c, addr = s.accept()
 
-        # while self.running:
-        #     c, addr = s.accept()
-        #     start_new_thread(self.new_philosopher, (c,))
-        # s.close()
-
-    # def new_philosopher(self, c):
         while self.running:
             r_data = c.recv(1024)
             try:

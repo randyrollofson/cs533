@@ -2,14 +2,15 @@
 
 import socket
 import pickle
-from threading import Thread
+from threading import Thread, Lock
 import time
 from _thread import *
 import random
 
 
-program_duration = 10
+program_duration = 30
 philosophers = []
+lock = Lock()
 
 
 class Philosopher:
@@ -51,7 +52,9 @@ class Client(Thread):
                 send_data.append(sticks_to_request)
                 data = pickle.dumps(send_data)
                 try:
+                    lock.acquire()
                     s.send(data)
+                    lock.release()
                 except:
                     pass
 
@@ -73,7 +76,9 @@ class Client(Thread):
             send_data.append(sticks_to_request)
             data = pickle.dumps(send_data)
             try:
+                lock.acquire()
                 s.send(data)
+                lock.release()
             except:
                 pass
 
@@ -93,14 +98,18 @@ class Client(Thread):
                 send_data.append(sticks_to_release)
                 data = pickle.dumps(send_data)
                 try:
+                    lock.acquire()
                     s.send(data)
+                    lock.release()
                 except:
                     pass
 
-                print(philosopher.name, "swaps chopstick order for next time")
-                temp = chopstick2
-                chopstick2 = chopstick1
-                chopstick1 = temp
+                try:
+                    s.recv(1024)
+                except:
+                    pass
+
+                time.sleep(random.random())
             else:
                 sticks_to_release = []
                 print(philosopher.name, "has both chopsticks!")
@@ -112,15 +121,19 @@ class Client(Thread):
                 send_data.append(sticks_to_release)
                 data = pickle.dumps(send_data)
                 try:
+                    lock.acquire()
                     s.send(data)
+                    lock.release()
                 except:
                     pass
 
-            try:
-                s.recv(1024)
-            except:
-                pass
-            time.sleep(random.random())
+                try:
+                    s.recv(1024)
+                except:
+                    pass
+
+                time.sleep(random.random())
+
         s.close()
 
     def eat(self, philosopher):
