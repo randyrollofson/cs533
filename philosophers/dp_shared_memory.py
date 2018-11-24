@@ -39,10 +39,7 @@ class Philosopher(Thread):
             if not chopstick2_attempt:
                 print(self.name, "failed to pick up chopstick 2, drops chopstick 1")
                 chopstick1.release()
-                print(self.name, "swaps chopstick order for next time")
-                temp = chopstick2
-                chopstick2 = chopstick1
-                chopstick1 = temp
+                time.sleep(random.random())
             else:
                 print(self.name, "has both chopsticks!")
                 self.eat()
@@ -81,10 +78,16 @@ def dining_philosophers():
 
 
 dining_philosophers()
+combined_wait_time = 0
+combined_throughput = 0
 print("\nWaiting times:")
 for philosopher in philosophers:
+    combined_wait_time += philosopher.total_wait_time
     print(philosopher.name, ": ", philosopher.total_wait_time)
+print("Total wait time:", combined_wait_time)
 
 print("\nNumber of times eating:")
 for philosopher in philosophers:
+    combined_throughput += philosopher.times_eating
     print(philosopher.name, ": ", philosopher.times_eating)
+print("Total throughput:", combined_throughput)
