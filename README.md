@@ -15,5 +15,5 @@ To run MPI producer-consumer file:
 `mpiexec -n 2 python3 mpi_pc.py`
 
 To run MPI dining philosophers file:
-`mpiexec -n 6 python mpi_diningphils.py`
+`mpiexec -n 6 python3 mpi_diningphils.py`
 
