@@ -182,15 +182,15 @@ elif rank == 5:
                         print(philosopher+" - requested chopstick"+str(sticks[j]))
                         send_data = self.request(sticks[j])
                         s_data = pickle.dumps(send_data)
-                        print('Sending '+philosopher+': '+str(send_data))
-                        data = comm.bcast(s_data,root=5)
+                        #print('Sending '+philosopher+': '+str(send_data))
+                        data = comm.bcast(s_data,root=rank)
                 elif action == "release":
                     for j in range(len(sticks)):
-                        print(philosopher+" - releases chopstick"+str(sticks[j]))
+                        #print(philosopher+" - releases chopstick"+str(sticks[j]))
                         self.release(sticks[j])
                     send_data = "all done"
                     s_data = pickle.dumps(send_data)
-                    data = comm.bcast(s_data,root=5)
+                    data = comm.bcast(s_data,root=rank)
 
         def request(self, chopstick_id):
             for chopstick in chopsticks:
