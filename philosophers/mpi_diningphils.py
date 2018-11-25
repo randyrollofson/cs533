@@ -2,7 +2,7 @@ from mpi4py import MPI
 import pickle
 from threading import Thread, Lock
 import time
-from thread import *
+from _thread import *
 import random
 
 comm = MPI.COMM_WORLD
@@ -24,18 +24,18 @@ if rank!=5:
 
     class Client(Thread):
         running = True
-	total_wait_time = 0
-	times_eating = 0
-	philosopher_name = None
+        total_wait_time = 0
+        times_eating = 0
+        philosopher_name = None
 
         def run(self):
-	    self.philosopher_name = "Philosopher"+str(rank+1)
-	    left_chopstick = rank
-	    if rank == 4:
-	        right_chopstick = 0
-	    else:
-		right_chopstick = rank+1
-	    philosopher = Philosopher(self.philosopher_name, left_chopstick, right_chopstick)
+            self.philosopher_name = "Philosopher"+str(rank+1)
+            left_chopstick = rank
+            if rank == 4:
+                right_chopstick = 0
+            else:
+                right_chopstick = rank+1
+            philosopher = Philosopher(self.philosopher_name, left_chopstick, right_chopstick)
             start_new_thread(self.attempt_to_eat, (philosopher,))
 
         def attempt_to_eat(self, philosopher):
@@ -58,9 +58,9 @@ if rank!=5:
                         lock.acquire()
                         data = comm.bcast(data,root=rank)
                         #comm.send(send_data,dest=5,tag=11)
-			lock.release()
+                        lock.release()
                     except Exception as e:
-			pass
+                        pass
 
                     try:
                         r_data = comm.bcast(data,root=rank)
@@ -163,16 +163,16 @@ elif rank == 5:
 
         def run(self):
             while self.running:
-		data = None
+                data = None
                 r_data = comm.bcast(data,root=rank)
                 
-		try:
+                try:
                     recvd_data = pickle.loads(r_data)
                 except EOFError:
                     print("ending program")
                     break
-		except Exception as e:
-		    continue
+                except Exception as e:
+                    continue
                 action = recvd_data[0]
                 philosopher = recvd_data[1]
                 sticks = recvd_data[2]
