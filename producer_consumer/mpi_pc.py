@@ -36,11 +36,6 @@ if rank == 1:
                 time.sleep(random.random())
 
         def run(self):
-            nums = range(5)
-            num = random.choice(nums)
-            self.queue.append(num)
-            self.total_digits_produced += 1
-
             start_new_thread(self.producer_thread, ())
 
             while self.running:
@@ -101,7 +96,6 @@ if rank == 0:
 
             while self.running:
                 condition.acquire()
-                recvd_data = None
                 self.queue = comm.recv(source=1, tag=11)
                 print('Consumer - Received from Producer: ' + str(self.queue))
                 condition.notify()
