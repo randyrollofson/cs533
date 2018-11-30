@@ -5,7 +5,11 @@ import random
 queue = []
 MAX_NUM = 5
 condition = Condition()
-program_duration = 30
+program_duration = 60
+number_of_runs = 50
+
+sum_wait_time = 0
+sum_throughput = 0
 
 
 class ProducerThread(Thread):
@@ -32,7 +36,6 @@ class ProducerThread(Thread):
             condition.notify()
             condition.release()
             time.sleep(random.random())
-            # time.sleep(0.1)
 
 
 class ConsumerThread(Thread):
@@ -57,18 +60,30 @@ class ConsumerThread(Thread):
             condition.notify()
             condition.release()
             time.sleep(random.random())
-            # time.sleep(0.1)
 
 
-p = ProducerThread()
-c = ConsumerThread()
-p.start()
-c.start()
-time.sleep(program_duration)
-p.running = False
-c.running = False
+for i in range(number_of_runs):
+    p = ProducerThread()
+    c = ConsumerThread()
+    p.start()
+    c.start()
+    time.sleep(program_duration)
+    p.running = False
+    c.running = False
 
-print("Total producer wait time: ", p.total_wait_time)
-print("Total consumer wait time: ", c.total_wait_time)
-print("Total digits produced:", p.total_digits_produced)
-print("Total digits consumed:", c.total_digits_consumed)
+    sum_wait_time += p.total_wait_time
+    sum_wait_time += c.total_wait_time
+    sum_throughput += p.total_digits_produced
+    sum_throughput += c.total_digits_consumed
+
+    print("\nTotal producer wait time: ", p.total_wait_time)
+    print("Total consumer wait time: ", c.total_wait_time)
+    print("Total wait time:", p.total_wait_time + c.total_wait_time)
+    print("Total digits produced:", p.total_digits_produced)
+    print("Total digits consumed:", c.total_digits_consumed)
+    print("Total throughput:", p.total_digits_produced + c.total_digits_consumed)
+
+    queue = []
+
+print("\n\nAverage wait time:", sum_wait_time / number_of_runs)
+print("Average throughput:", sum_throughput / number_of_runs)

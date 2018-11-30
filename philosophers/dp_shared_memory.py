@@ -4,8 +4,12 @@ import time
 from threading import Thread, Lock
 
 
-program_duration = 10
+program_duration = 60
+number_of_runs = 50
 philosophers = []
+
+sum_wait_time = 0
+sum_throughput = 0
 
 
 class Philosopher(Thread):
@@ -73,21 +77,32 @@ def dining_philosophers():
     for p in philosophers:
         p.start()
     time.sleep(program_duration)
-    Philosopher.running = False
+
+    for p in philosophers:
+        p.running = False
     print("Finishing...")
 
 
-dining_philosophers()
-combined_wait_time = 0
-combined_throughput = 0
-print("\nWaiting times:")
-for philosopher in philosophers:
-    combined_wait_time += philosopher.total_wait_time
-    print(philosopher.name, ": ", philosopher.total_wait_time)
-print("Total wait time:", combined_wait_time)
+for j in range(number_of_runs):
+    dining_philosophers()
+    combined_wait_time = 0
+    combined_throughput = 0
+    print("\nWaiting times:")
+    for philosopher in philosophers:
+        combined_wait_time += philosopher.total_wait_time
+        print(philosopher.name, ": ", philosopher.total_wait_time)
+    print("Total wait time:", combined_wait_time)
 
-print("\nNumber of times eating:")
-for philosopher in philosophers:
-    combined_throughput += philosopher.times_eating
-    print(philosopher.name, ": ", philosopher.times_eating)
-print("Total throughput:", combined_throughput)
+    print("\nNumber of times eating:")
+    for philosopher in philosophers:
+        combined_throughput += philosopher.times_eating
+        print(philosopher.name, ": ", philosopher.times_eating)
+    print("Total throughput:", combined_throughput)
+
+    sum_wait_time += combined_wait_time
+    sum_throughput += combined_throughput
+
+    philosophers = []
+
+print("\n\nAverage wait time:", sum_wait_time / number_of_runs)
+print("Average throughput:", sum_throughput / number_of_runs)
