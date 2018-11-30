@@ -1,5 +1,4 @@
 from mpi4py import MPI
-import pickle
 from threading import Thread, Lock
 import time
 from _thread import *
@@ -13,7 +12,7 @@ program_duration = 30
 philosopher = None
 chopsticks = []
 
-# Client represents the 5 philosophers
+#Philosopher_thread represents the 5 philosophers
 if rank!=5:
     class Philosopher:
 
@@ -22,7 +21,7 @@ if rank!=5:
             self.chopstick1 = left_chopstick
             self.chopstick2 = right_chopstick
 
-    class Client(Thread):
+    class Philosopher_thread(Thread):
         running = True
         total_wait_time = 0
         times_eating = 0
@@ -53,21 +52,18 @@ if rank!=5:
                     send_data.append(self.philosopher_name)
                     sticks_to_request.append(chopstick1)
                     send_data.append(sticks_to_request)
-                    data = pickle.dumps(send_data)
                     try:
                         lock.acquire()
-                        data = comm.bcast(data,root=rank)
-                        #comm.send(send_data,dest=5,tag=11)
+                        comm.send(send_data,dest=5,tag=11)
                         lock.release()
                     except Exception as e:
                         pass
 
                     try:
-                        r_data = comm.bcast(data,root=rank)
-                        #recv_data = comm.recv(source=MPI.ANY_SOURCE, tag=11)
-                        recv_data = pickle.loads(r_data)
-                    except Exception:
-                        pass
+                        recv_data = comm.recv(source=5, tag=11)
+                    except Exception as e:
+                        print(e)
+                        pass                      
 
                 t1 = time.time()
                 self.total_wait_time += (t1 - t0)
@@ -79,18 +75,17 @@ if rank!=5:
                 send_data.append(self.philosopher_name)
                 sticks_to_request.append(chopstick2)
                 send_data.append(sticks_to_request)
-                data = pickle.dumps(send_data)
                 try:
                     lock.acquire()
-                    data = comm.bcast(data,root=rank)
+                    comm.send(send_data,dest=5,tag=11)
                     lock.release()
                 except:
                     pass
 
                 try:
-                    r_data = comm.bcast(data,root=rank)
-                    recv_data = pickle.loads(r_data)
-                except:
+                    recv_data = comm.recv(source=5, tag=11)
+                except Exception as e:
+                    print(e)
                     pass
 
                 send_data = []
@@ -101,16 +96,15 @@ if rank!=5:
                     send_data.append(self.philosopher_name)
                     sticks_to_release.append(chopstick1)
                     send_data.append(sticks_to_release)
-                    data = pickle.dumps(send_data)
                     try:
                         lock.acquire()
-                        data = comm.bcast(data,root=rank)
+                        comm.send(send_data,dest=5,tag=11)
                         lock.release()
                     except:
                         pass
 
                     try:
-                        r_data = comm.bcast(data,root=rank)
+                    	r_data = comm.recv(source=5, tag=11)
                     except:
                         pass
 
@@ -124,16 +118,15 @@ if rank!=5:
                     sticks_to_release.append(chopstick1)
                     sticks_to_release.append(chopstick2)
                     send_data.append(sticks_to_release)
-                    data = pickle.dumps(send_data)
                     try:
                         lock.acquire()
-                        data = comm.bcast(data,root=rank)
+                        comm.send(send_data,dest=5,tag=11)
                         lock.release()
                     except:
                         pass
 
                     try:
-                        r_data = comm.bcast(data,root=rank)
+                    	r_data = comm.recv(source=5, tag=11)
                     except:
                         pass
 
@@ -144,53 +137,53 @@ if rank!=5:
             self.times_eating += 1
             time.sleep(random.random())
             print(self.philosopher_name+" - finishes eating, drops both chopsticks")
-
-    client = Client()
-    client.start()
+    
+    philosopher_thread = Philosopher_thread()
+    philosopher_thread.start()
     time.sleep(program_duration)
-    client.running = False
+    philosopher_thread.running = False
 
+    time.sleep(rank+1)
+    comm.send([(rank+1),philosopher_thread.total_wait_time,philosopher_thread.times_eating],dest=5,tag=11)
     print("\nPhilosopher %d - Finishing..."%(rank+1))
-    print("Philosopher %d - Waiting times: "%(rank+1), client.total_wait_time)
-    print("Philosopher %d - Number of times eating: "%(rank+1),client.times_eating)
+    print("Philosopher %d - Waiting times: "%(rank+1), philosopher_thread.total_wait_time)
+    print("Philosopher %d - Number of times eating: "%(rank+1),philosopher_thread.times_eating)
     time.sleep(2)
 
-# Server acts as the "waiter" in the dining philosophers problem.
-# Server manages the distribution of the chopsticks to the philosophers
+#  This acts as the "waiter" in the dining philosophers problem.
+# Waiter manages the distribution of the chopsticks to the philosophers
 elif rank == 5:
-    class Server(Thread):
+
+    for i in range(5):
+        chopstick = {
+            "id": i,
+            "in_use": False
+        }
+        chopsticks.append(chopstick)
+
+    class Waiter (Thread):
         running = True
 
         def run(self):
             while self.running:
                 data = None
-                r_data = comm.bcast(data,root=rank)
-                
-                try:
-                    recvd_data = pickle.loads(r_data)
-                except EOFError:
-                    print("ending program")
-                    break
-                except Exception as e:
-                    continue
+                action = None
+                recvd_data = comm.recv(source=MPI.ANY_SOURCE, tag=11)
                 action = recvd_data[0]
                 philosopher = recvd_data[1]
                 sticks = recvd_data[2]
-
+                destrank = int(philosopher[-1]) - 1
                 if action == "request":
                     for j in range(len(sticks)):
                         print(philosopher+" - requested chopstick"+str(sticks[j]))
                         send_data = self.request(sticks[j])
-                        s_data = pickle.dumps(send_data)
-                        #print('Sending '+philosopher+': '+str(send_data))
-                        data = comm.bcast(s_data,root=rank)
+                        comm.send(send_data,dest=destrank,tag=11)
                 elif action == "release":
                     for j in range(len(sticks)):
-                        #print(philosopher+" - releases chopstick"+str(sticks[j]))
+                        print(philosopher+" - releases chopstick"+str(sticks[j]))
                         self.release(sticks[j])
                     send_data = "all done"
-                    s_data = pickle.dumps(send_data)
-                    data = comm.bcast(s_data,root=rank)
+                    comm.send(send_data,dest=destrank,tag=11)
 
         def request(self, chopstick_id):
             for chopstick in chopsticks:
@@ -205,9 +198,25 @@ elif rank == 5:
                 if chopstick["id"] == chopstick_id:
                     chopstick["in_use"] = False
 
-
-    server = Server()
-    server.start()
+    waiter = Waiter()
+    waiter.start()
     time.sleep(program_duration)
-    server.running = False
-    print("Waiter Finishing...")
+    waiter.running = False
+    print("Finishing...")
+
+    time.sleep(6)
+    numPhils=5
+    combined_throughput=0
+    combined_wait_time=0
+    tpt_time_data=[]
+    while(numPhils!=0):
+        recvd_data = comm.recv(source=MPI.ANY_SOURCE, tag=11)
+        if recvd_data[0] in range(1,6):
+            numPhils = numPhils-1
+            combined_throughput = combined_throughput + recvd_data[2]
+            combined_wait_time = combined_wait_time + recvd_data[1]
+
+    print("Total Wait Time: %f"%combined_wait_time)
+    print("Total Throughput: %d"%combined_throughput)
+
+    time.sleep(2)
