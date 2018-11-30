@@ -166,12 +166,18 @@ client.start()
 time.sleep(program_duration)
 client.running = False
 
+combined_wait_time = 0
+combined_throughput = 0
 print("Finishing...")
 print("\nWaiting times:")
 for philosopher in philosophers:
+    combined_wait_time += philosopher.total_wait_time
     print(philosopher.name, ": ", philosopher.total_wait_time)
+print("Total wait time:", combined_wait_time)
 
 print("\nNumber of times eating:")
 for philosopher in philosophers:
+    combined_throughput += philosopher.times_eating
     print(philosopher.name, ": ", philosopher.times_eating)
+print("Total throughput:", combined_throughput)
 
