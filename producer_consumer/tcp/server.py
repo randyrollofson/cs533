@@ -8,7 +8,7 @@ import time
 import random
 
 condition = Condition()
-program_duration = 30
+program_duration = 60
 
 
 class Server(Thread):

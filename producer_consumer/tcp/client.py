@@ -9,7 +9,7 @@ from _thread import *
 
 MAX_NUM = 5
 condition = Condition()
-program_duration = 30
+program_duration = 60
 
 
 class Client(Thread):
