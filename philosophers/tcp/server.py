@@ -7,7 +7,7 @@ import time
 from threading import Thread, Lock
 
 
-program_duration = 30
+program_duration = 60
 chopsticks = []
 
 lock = Lock()

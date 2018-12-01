@@ -8,7 +8,7 @@ from _thread import *
 import random
 
 
-program_duration = 30
+program_duration = 60
 philosophers = []
 lock = Lock()
 
