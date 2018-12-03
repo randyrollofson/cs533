@@ -12,7 +12,7 @@ philosophers = []
 class Philosopher(Thread):
     running = True
     total_wait_time = 0
-    times_eating = 0
+    times_writing = 0
 
     def __init__(self, name, left_file, right_file):
         threading.Thread.__init__(self)
@@ -41,7 +41,7 @@ class Philosopher(Thread):
                 file_2 = open(right_file, 'a+')
                 portalocker.lock(file_2, portalocker.LOCK_EX | portalocker.LOCK_NB)
                 print(self.name, "has both files!")
-                self.eat(file_2, file_1)
+                self.write(file_2, file_1)
                 portalocker.unlock(file_2)
                 portalocker.unlock(file_1)
                 file_2.close()
@@ -52,11 +52,11 @@ class Philosopher(Thread):
                 portalocker.unlock(file_1)
                 time.sleep(random.random())
 
-    def eat(self, file1, file2):
+    def write(self, file1, file2):
         print(self.name, "starts writing")
         file1.write(self.name + " wrote at " + time.strftime("%a, %d %b %Y %H:%M:%S", time.localtime()) +"\n")
         file2.write(self.name + " wrote at " + time.strftime("%a, %d %b %Y %H:%M:%S", time.localtime()) +"\n")
-        self.times_eating += 1
+        self.times_writing += 1
         time.sleep(random.random())
         print(self.name, "finishes writing, releases both files")
 
@@ -102,10 +102,10 @@ for philosopher in philosophers:
     print(philosopher.name, ": ", philosopher.total_wait_time)
 print("Total wait time:", combined_wait_time)
 
-print("\nNumber of times eating:")
+print("\nNumber of times writing:")
 for philosopher in philosophers:
-    combined_throughput += philosopher.times_eating
-    print(philosopher.name, ": ", philosopher.times_eating)
+    combined_throughput += philosopher.times_writing
+    print(philosopher.name, ": ", philosopher.times_writing)
 print("Total throughput:", combined_throughput)
 
 
