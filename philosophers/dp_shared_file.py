@@ -9,9 +9,6 @@ import portalocker
 program_duration = 60   #time to execute each program
 philosophers = []
 
-sum_wait_time = 0
-sum_throughput = 0
-
 class Philosopher(Thread):
     running = True
     total_wait_time = 0
@@ -74,12 +71,8 @@ def dining_philosophers():
 
     for i in range(len(files)):
         FILENAME = os.path.dirname(os.getcwd())+"/files/" + files[i]
-        if os.path.isfile(FILENAME):
-            with open(FILENAME, 'w'):
-                abspath_files.append(FILENAME)
-        else:
-            with open(FILENAME, 'w'):
-                abspath_files.append(FILENAME)
+        with open(FILENAME, 'w'):
+            abspath_files.append(FILENAME)
 
     philosopher_names = ['Philosopher 1', 'Philosopher 2', 'Philosopher 3', 'Philosopher 4', 'Philosopher 5']
 
