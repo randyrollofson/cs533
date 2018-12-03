@@ -17,3 +17,7 @@ To run MPI producer-consumer file:
 To run MPI dining philosophers file:
 `mpiexec -n 6 python3 mpi_diningphils.py`
 
+To download the portalocker python package use the following command:
+`pip3 install portalocker`
+or
+`sudo apt-get install python-portalocker`
