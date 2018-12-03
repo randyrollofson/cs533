@@ -4,10 +4,13 @@ import random
 import os
 
 FILENAME =  os.path.dirname(os.getcwd())+"/file.txt"
-MAX_NUM = 10
-program_duration = 10
-condition = Condition()
 
+program_duration = 60   #time to execute each program
+condition = Condition()
+number_of_runs = 50
+
+sum_wait_time = 0
+sum_throughput = 0
 
 class ProducerThread(Thread):
     running = True
@@ -85,16 +88,30 @@ if os.path.isfile(FILENAME):
 else:
     with open(FILENAME, 'w'):
         pass    #creates file as it doens't exist
-    
-p = ProducerThread()
-c = ConsumerThread()
-p.start()
-c.start()
-time.sleep(program_duration)
-p.running = False
-c.running = False
 
-print("total producer wait time: ", p.total_wait_time)
-print("total consumer wait time: ", c.total_wait_time)
-print("Total digits produced:", p.total_digits_produced)
-print("Total digits consumed:", c.total_digits_consumed)
+for i in range(number_of_runs):
+    p = ProducerThread()
+    c = ConsumerThread()
+    p.start()
+    c.start()
+    time.sleep(program_duration)
+    p.running = False
+    c.running = False
+
+    sum_wait_time += p.total_wait_time
+    sum_wait_time += c.total_wait_time
+    sum_throughput += p.total_digits_produced
+    sum_throughput += c.total_digits_consumed
+
+    print("\nTotal producer wait time: ", p.total_wait_time)
+    print("Total consumer wait time: ", c.total_wait_time)
+    print("Total wait time:", p.total_wait_time + c.total_wait_time)
+    print("Total digits produced:", p.total_digits_produced)
+    print("Total digits consumed:", c.total_digits_consumed)
+    print("Total throughput:", p.total_digits_produced + c.total_digits_consumed)
+
+
+print("\n\nAverage wait time:", sum_wait_time / number_of_runs)
+print("Average throughput:", sum_throughput / number_of_runs)
+
+
