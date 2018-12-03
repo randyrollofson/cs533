@@ -6,8 +6,11 @@ import time
 from threading import Thread
 import portalocker
 
-program_duration = 10
+program_duration = 60   #time to execute each program
 philosophers = []
+
+sum_wait_time = 0
+sum_throughput = 0
 
 class Philosopher(Thread):
     running = True
@@ -23,9 +26,9 @@ class Philosopher(Thread):
     def run(self):
         while self.running:
             print(self.name, "attempts to write...")
-            self.attempt_to_eat()
+            self.attempt_to_write()
 
-    def attempt_to_eat(self):
+    def attempt_to_write(self):
         left_file = self.left_file
         right_file = self.right_file
 
@@ -54,8 +57,8 @@ class Philosopher(Thread):
 
     def eat(self, file1, file2):
         print(self.name, "starts writing")
-        file1.write(self.name + " wrote at " + str(time.time()) +"\n")
-        file2.write(self.name + " wrote at " + str(time.time()) +"\n")
+        file1.write(self.name + " wrote at " + time.strftime("%a, %d %b %Y %H:%M:%S", time.localtime()) +"\n")
+        file2.write(self.name + " wrote at " + time.strftime("%a, %d %b %Y %H:%M:%S", time.localtime()) +"\n")
         self.times_eating += 1
         time.sleep(random.random())
         print(self.name, "finishes writing, releases both files")
@@ -74,12 +77,9 @@ def dining_philosophers():
         if os.path.isfile(FILENAME):
             with open(FILENAME, 'w'):
                 abspath_files.append(FILENAME)
-                pass
-            pass    #pass if file exists
         else:
             with open(FILENAME, 'w'):
-                pass    #creates file as it doens't exist
-
+                abspath_files.append(FILENAME)
 
     philosopher_names = ['Philosopher 1', 'Philosopher 2', 'Philosopher 3', 'Philosopher 4', 'Philosopher 5']
 
@@ -114,3 +114,6 @@ for philosopher in philosophers:
     combined_throughput += philosopher.times_eating
     print(philosopher.name, ": ", philosopher.times_eating)
 print("Total throughput:", combined_throughput)
+
+
+
